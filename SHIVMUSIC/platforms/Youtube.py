@@ -15,13 +15,14 @@ from youtubesearchpython.__future__ import VideosSearch, Playlist
 DOWNLOAD_DIR = "downloads"
 LOGGER = logging.getLogger("BETA BOT HUB | 👑 THE SHIV")
 
-# 🟢 Primary API (Shruti)
+# 🟢 Primary API (MusicSp)
+MUSICSP_API_URL = os.environ.get("MusicSp_API_URL", "https://apisparrow.site")
+MUSICSP_API_KEY = os.environ.get("MusicSp_API_KEY", "Enter Your Api")
+
+# 🟡 Secondary API (Shruti)
 SHRUTI_API_URL = os.environ.get("SHRUTI_API_URL", "https://shrutibots.site")
 SHRUTI_API_KEY = os.environ.get("SHRUTI_API_KEY", "")
 
-# 🟡 Secondary API (MusicSp)
-MUSICSP_API_URL = os.environ.get("MusicSp_API_URL", "https://apisparrow.site")
-MUSICSP_API_KEY = os.environ.get("MusicSp_API_KEY", "Enter Your Api")
 
 def time_to_seconds(time_str):
     stringt = str(time_str)
@@ -92,6 +93,7 @@ async def external_api_download(api_url: str, api_key: str, video_id: str, downl
             except: pass
         return None
 
+
 async def download_song(link: str, title: str = None) -> str:
     video_id = extract_video_id(link)
     if not video_id or len(video_id) < 3: return None
@@ -103,18 +105,19 @@ async def download_song(link: str, title: str = None) -> str:
             if res and res.get("result"): title = res["result"][0]["title"]
         except Exception: pass
 
-    # 1. Primary API (Shruti)
-    shruti_result = await external_api_download(SHRUTI_API_URL, SHRUTI_API_KEY, video_id, "audio", title, "Shruti")
-    if shruti_result: return shruti_result
-
-    LOGGER.warning(f"🔴 Shruti API failed for '{title}'. Hopping to MusicSp API...")
-
-    # 2. Secondary API (MusicSp Fallback)
+    # 1. Primary API (MusicSp)
     musicsp_result = await external_api_download(MUSICSP_API_URL, MUSICSP_API_KEY, video_id, "audio", title, "MusicSp")
     if musicsp_result: return musicsp_result
+
+    LOGGER.warning(f"🔴 MusicSp API failed for '{title}'. Hopping to Shruti API...")
+
+    # 2. Secondary API (Shruti Fallback)
+    shruti_result = await external_api_download(SHRUTI_API_URL, SHRUTI_API_KEY, video_id, "audio", title, "Shruti")
+    if shruti_result: return shruti_result
     
-    LOGGER.error(f"🔴 Both Shruti and MusicSp APIs failed to download '{title}'.")
+    LOGGER.error(f"🔴 Both MusicSp and Shruti APIs failed to download '{title}'.")
     return None
+
 
 async def download_video(link: str, title: str = None) -> str:
     video_id = extract_video_id(link)
@@ -127,17 +130,17 @@ async def download_video(link: str, title: str = None) -> str:
             if res and res.get("result"): title = res["result"][0]["title"]
         except: pass
 
-    # 1. Primary API (Shruti)
-    shruti_result = await external_api_download(SHRUTI_API_URL, SHRUTI_API_KEY, video_id, "video", title, "Shruti")
-    if shruti_result: return shruti_result
-
-    LOGGER.warning(f"🔴 Shruti API failed for '{title}'. Hopping to MusicSp API...")
-
-    # 2. Secondary API (MusicSp Fallback)
+    # 1. Primary API (MusicSp)
     musicsp_result = await external_api_download(MUSICSP_API_URL, MUSICSP_API_KEY, video_id, "video", title, "MusicSp")
     if musicsp_result: return musicsp_result
+
+    LOGGER.warning(f"🔴 MusicSp API failed for '{title}'. Hopping to Shruti API...")
+
+    # 2. Secondary API (Shruti Fallback)
+    shruti_result = await external_api_download(SHRUTI_API_URL, SHRUTI_API_KEY, video_id, "video", title, "Shruti")
+    if shruti_result: return shruti_result
     
-    LOGGER.error(f"🔴 Both Shruti and MusicSp APIs failed to download '{title}'.")
+    LOGGER.error(f"🔴 Both MusicSp and Shruti APIs failed to download '{title}'.")
     return None
 
 # ----------------- YOUTUBE API CLASS -----------------
